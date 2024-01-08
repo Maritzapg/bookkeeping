@@ -12,7 +12,7 @@ const columns: GridColDef[] = [
   {
     field: 'name',
     headerName: 'Name',
-    width: 450,
+    width: 500,
   },
   {
     field: 'associatedTasks',

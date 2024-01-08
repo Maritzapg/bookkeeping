@@ -1,13 +1,14 @@
 import axios from 'axios'
 import { Task } from '../utils/types'
 
+const baseUrl = 'http://localhost:3001'
+
 export default class TasksService {
   getTasks = async (): Promise<Task[]> => {
-    return (await axios.get('http://localhost:3001/tasks')).data
+    return (await axios.get(`${baseUrl}/tasks`)).data
   }
 
   completeTask = async (task: Task) => {
-    // await axios.get(`http://localhost:3001/tasks/processInvoice`)
-    await axios.get(`http://localhost:3001/tasks/${task.id}`)
+    await axios.get(`${baseUrl}/tasks/${task.id}`)
   }
 }
