@@ -1,4 +1,4 @@
-import { FC, ReactElement, useCallback, useEffect, useState } from 'react'
+import { FC, ReactElement, forwardRef, useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 import Container from '@mui/material/Container'
 import Box from '@mui/material/Box'
@@ -9,6 +9,7 @@ import Input from '../components/form/Input'
 import TasksService from '../services/tasksService'
 import { Bot, Task } from '../utils/types'
 import Typography from '@mui/joy/Typography'
+import MuiAlert, { AlertProps } from '@mui/material/Alert'
 
 const generateRandom = (min: number, max: number, except?: number): number => {
   let num = Math.floor(Math.random() * max)
@@ -18,11 +19,16 @@ const generateRandom = (min: number, max: number, except?: number): number => {
   return num
 }
 
+const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />
+})
+
 const Bookkeeping: FC = (): ReactElement => {
   const [botName, setBotName] = useState<string>('')
   const [bot, setBot] = useState<Bot>()
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isCompletingTask, setIsCompletingTask] = useState<boolean>(false)
 
   const getTasks = useCallback(async () => {
     setIsLoading(true)
@@ -40,11 +46,12 @@ const Bookkeeping: FC = (): ReactElement => {
   }, [])
 
   const completeTask = async (task: Task) => {
-    const newTasksList = tasks.filter(t => t.id !== task.id)
+    setIsCompletingTask(true)
 
     await new TasksService().completeTask(task)
+    setTasks(oldTasks => oldTasks.filter(t => t.id !== task.id))
 
-    setTasks(newTasksList)
+    setIsCompletingTask(false)
   }
 
   useEffect(() => {
@@ -72,16 +79,21 @@ const Bookkeeping: FC = (): ReactElement => {
   return (
     <Container fixed>
       <Box sx={{ bgcolor: '#ebf5ee', height: 'auto', padding: '40px' }}>
-        <Input setValue={value => setBotName(value)} />
+        <Input setValue={value => setBotName(value)} isDisabled={isCompletingTask} />
         {isLoading && <LinearProgress />}
         {!isLoading && tasks.length > 0 && <Tasks tasks={tasks} />}
         {tasks.length === 0 && (
-          <Typography color='warning' level='h4'>
-            You have completed all the tasks!
-          </Typography>
+          <>
+            <div style={{ height: '30px' }} />
+            <Typography color='warning' level='h4'>
+              No tasks found
+            </Typography>
+            <div style={{ height: '10px' }} />
+          </>
         )}
         <Bots newBot={bot} />
       </Box>
+      {isCompletingTask && <Alert severity='info'>Completing tasks...</Alert>}
     </Container>
   )
 }
