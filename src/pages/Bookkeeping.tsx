@@ -46,16 +46,13 @@ const Bookkeeping: FC = (): ReactElement => {
   }, [])
 
   const completeTask = async (task: Task) => {
-    setIsCompletingTask(true)
-
     await new TasksService().completeTask(task)
     setTasks(oldTasks => oldTasks.filter(t => t.id !== task.id))
-
-    setIsCompletingTask(false)
   }
 
   useEffect(() => {
     if (botName !== '' && tasks.length > 0) {
+      setIsCompletingTask(true)
       const unique_id = uuid()
       const indexTask1 = generateRandom(0, tasks.length)
       const indexTask2 = generateRandom(0, tasks.length, indexTask1)
@@ -73,6 +70,7 @@ const Bookkeeping: FC = (): ReactElement => {
 
       setBot(newBot)
       setBotName('')
+      setIsCompletingTask(false)
     }
   }, [botName])
 
